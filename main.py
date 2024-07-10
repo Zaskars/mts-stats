@@ -1,3 +1,5 @@
+import logging
+
 import requests
 import schedule
 import time
@@ -13,8 +15,12 @@ import os
 API_URL = os.getenv('API_URL')
 API_TOKEN = os.getenv('API_TOKEN')
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def fetch_data_from_api(from_date: str) -> List[Dict]:
+    logger.info(f"Fetching data from date: {from_date}")
     # headers = {
     #     "x-auth-token": API_TOKEN,
     #     "Content-Type": "application/x-www-form-urlencoded"
@@ -25,6 +31,7 @@ def fetch_data_from_api(from_date: str) -> List[Dict]:
 
 
 def insert_or_update_user(session, user_data):
+    logger.info(f"Inserting or updating user: {user_data['id']}")
     user = session.query(User).filter_by(id=user_data['id']).first()
     if user:
         user.email = user_data['email']
@@ -48,6 +55,7 @@ def insert_or_update_user(session, user_data):
 
 
 def insert_or_update_event(session, event_data):
+    logger.info(f"Inserting or updating event: {event_data['id']}")
     event = session.query(Event).filter_by(id=event_data['id']).first()
     if event:
         event.name = event_data['name']
@@ -67,6 +75,8 @@ def insert_or_update_event(session, event_data):
 
 
 def insert_or_update_user_event_stat(session, user_event_stat_data):
+    logger.info(f"Inserting or updating user event stat for user {user_event_stat_data['user_id']} and event "
+                f"{user_event_stat_data['event_id']}")
     user_event_stat = session.query(UserEventStat).filter_by(
         user_id=user_event_stat_data['user_id'],
         event_id=user_event_stat_data['event_id']
@@ -109,6 +119,8 @@ def insert_or_update_user_event_stat(session, user_event_stat_data):
 
 
 def insert_or_update_connection(session, connection_data):
+    logger.info(
+        f"Inserting or updating connection for user {connection_data['user_id']} at {connection_data['joined']}")
     connection = session.query(Connection).filter_by(
         user_id=connection_data['user_id'],
         joined=connection_data['joined']
@@ -181,6 +193,7 @@ def job():
     from_date = "2022-01-01+00:00:00"
     data = fetch_data_from_api(from_date)
     insert_data_into_db(data)
+    logger.info("Job executed successfully")
 
 
 schedule.every().day.at("00:26").do(job)
