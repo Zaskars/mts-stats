@@ -13,8 +13,8 @@ class User(Base):
     patr_name = Column(String, nullable=True)
     phone = Column(String)
     sex = Column(String)
-    user_event_stats = relationship('UserEventStat', back_populates='user')
-    connections = relationship('Connection', back_populates='user')
+    user_event_stats = relationship('UserEventStat', back_populates='user', cascade='all, delete-orphan')
+    connections = relationship('Connection', back_populates='user', cascade='all, delete-orphan')
 
 
 class Event(Base):
@@ -24,15 +24,15 @@ class Event(Base):
     starts_at = Column(DateTime)
     ends_at = Column(DateTime)
     duration = Column(Integer)
-    user_event_stats = relationship('UserEventStat', back_populates='event')
-    connections = relationship('Connection', back_populates='event')
+    user_event_stats = relationship('UserEventStat', back_populates='event', cascade='all, delete-orphan')
+    connections = relationship('Connection', back_populates='event', cascade='all, delete-orphan')
 
 
 class UserEventStat(Base):
     __tablename__ = 'user_event_stats'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey('users.id'))
-    event_id = Column(String, ForeignKey('events.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE'))
+    event_id = Column(String, ForeignKey('events.id', ondelete='CASCADE'))
     question_count = Column(Integer)
     chat_message_count = Column(Integer)
     user_chat_message_count = Column(Integer)
@@ -55,8 +55,8 @@ class UserEventStat(Base):
 class Connection(Base):
     __tablename__ = 'connections'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey('users.id'))
-    event_id = Column(String, ForeignKey('events.id'))
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE'))
+    event_id = Column(String, ForeignKey('events.id', ondelete='CASCADE'))
     joined = Column(DateTime)
     leaved = Column(DateTime)
     duration = Column(Integer)
