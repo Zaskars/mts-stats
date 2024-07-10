@@ -10,9 +10,9 @@ from database import get_session, engine
 from models import Base, User, Event, UserEventStat, Connection
 from mock_data import get_mock_data  # Импортируем функцию для получения статических данных
 import os
+from dotenv import load_dotenv
 
-# Константы из переменных окружения
-API_URL = os.getenv('API_URL')
+API_URL = 'https://userapi.mts-link.ru/v3/stats/users'
 API_TOKEN = os.getenv('API_TOKEN')
 
 logging.basicConfig(level=logging.INFO)
@@ -190,6 +190,7 @@ def insert_data_into_db(data: List[Dict]) -> None:
 
 
 def job():
+    logger.info(f"Job started")
     from_date = "2022-01-01+00:00:00"
     data = fetch_data_from_api(from_date)
     insert_data_into_db(data)
@@ -199,6 +200,7 @@ def job():
 schedule.every().day.at("00:26").do(job)
 
 if __name__ == "__main__":
+    logger.info(f"Launched")
     # Создаем таблицы, если их нет
     Base.metadata.create_all(engine)
 
