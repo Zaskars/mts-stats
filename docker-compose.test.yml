@@ -15,7 +15,7 @@ services:
   app:
     build: .
     env_file:
-      - .env.test
+      - .env.test.example
     volumes:
       - .:/app
     depends_on:
