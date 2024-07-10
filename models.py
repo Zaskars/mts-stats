@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
-
 class User(Base):
     __tablename__ = 'users'
     id = Column(String, primary_key=True)
@@ -14,18 +13,26 @@ class User(Base):
     patr_name = Column(String, nullable=True)
     phone = Column(String)
     sex = Column(String)
-    event_sessions = relationship('EventSession', back_populates='user')
+    user_event_stats = relationship('UserEventStat', back_populates='user')
+    connections = relationship('Connection', back_populates='user')
 
 
-class EventSession(Base):
-    __tablename__ = 'event_sessions'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(String, ForeignKey('users.id'))
+class Event(Base):
+    __tablename__ = 'events'
+    id = Column(String, primary_key=True)
     name = Column(String)
     starts_at = Column(DateTime)
     ends_at = Column(DateTime)
     duration = Column(Integer)
-    event_id = Column(String)
+    user_event_stats = relationship('UserEventStat', back_populates='event')
+    connections = relationship('Connection', back_populates='event')
+
+
+class UserEventStat(Base):
+    __tablename__ = 'user_event_stats'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('users.id'))
+    event_id = Column(String, ForeignKey('events.id'))
     question_count = Column(Integer)
     chat_message_count = Column(Integer)
     user_chat_message_count = Column(Integer)
@@ -39,22 +46,24 @@ class EventSession(Base):
     actual_participant_activity_percent = Column(Float)
     rating = Column(Integer)
     attention_control = Column(JSON)
-    connections = relationship('Connection', back_populates='event_session')
-    user = relationship('User', back_populates='event_sessions')
+    user = relationship('User', back_populates='user_event_stats')
+    event = relationship('Event', back_populates='user_event_stats')
 
-    __table_args__ = (UniqueConstraint('id', 'user_id', name='_event_session_uc'),)
+    __table_args__ = (UniqueConstraint('user_id', 'event_id', name='_user_event_stat_uc'),)
 
 
 class Connection(Base):
     __tablename__ = 'connections'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    session_id = Column(Integer, ForeignKey('event_sessions.id'))
+    user_id = Column(String, ForeignKey('users.id'))
+    event_id = Column(String, ForeignKey('events.id'))
     joined = Column(DateTime)
     leaved = Column(DateTime)
     duration = Column(Integer)
     country = Column(String)
     city = Column(String)
     platform = Column(String)
-    event_session = relationship('EventSession', back_populates='connections')
+    user = relationship('User', back_populates='connections')
+    event = relationship('Event', back_populates='connections')
 
-    __table_args__ = (UniqueConstraint('session_id', 'joined', name='_connection_uc'),)
+    __table_args__ = (UniqueConstraint('user_id', 'joined', name='_connection_uc'),)
